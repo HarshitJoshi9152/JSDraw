@@ -68,6 +68,9 @@ window.addEventListener("mouseup", (e)=>{
 
 
 /*
+
+this version uses 'mousedown' event but using 'mouseover' event can be better
+
 todo
 
 draw line between checkpoint using distance formula
