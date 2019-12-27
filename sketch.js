@@ -10,62 +10,95 @@ function setup() {
 }
 
 let data = [],
+	redo_data = [],
+	undo_done,
 	prev_put_data,
 	prev_fill = {},
 	drawnSomething,
 	brushSize = 20,
 	brushColor = "red";
+
+
 function draw() {
-	// if(height !== window.innerHeight || width !== window.innerWidth){
-	// 	canvas.width = window.innerWidth;
-	// 	canvas.height = window.innerHeight;
-	// }
-  if(data[1] && prev_put_data !== data[data.length - 1]){
+
+  if(data[1] && prev_put_data !== data[data.length - 1])
+  {
   	prev_put_data = data[data.length-1];
   	ctx.putImageData(prev_put_data,0,0);
   	console.log("data put", prev_put_data);
   }
-  if(mouseIsPressed){
-  	if(JSON.stringify(prev_fill) !== JSON.stringify({mouseX,mouseY,brushSize,brushColor})){
-	  	fill(brushColor)
-	  	ellipse(mouseX,mouseY,brushSize,brushSize);
-	  	prev_fill = {mouseX,mouseY,brushSize,brushColor};
-	  	drawnSomething = true;
+  if(mouseIsPressed && JSON.stringify(prev_fill) !== JSON.stringify({mouseX,mouseY,brushSize,brushColor}))
+  {
+	fill(brushColor)
+  	ellipse(mouseX,mouseY,brushSize,brushSize);
+  	prev_fill = {mouseX,mouseY,brushSize,brushColor};
+  	drawnSomething = true;
+  	if(undo_done == true)
+  	{
+		// redo_data array must be flushed when we make changes after using undo
+  		redo_data.length = 0;
   	}
   }
 }
 
-window.onkeydown = (e)=>{
-	console.log(e)
-	if(e.ctrlKey == true && e.key == "ArrowUp"){
-		brushSize++;
-	}
-	if(e.ctrlKey == true && e.key == "ArrowDown"){
-		brushSize--;
+
+function mouseDragged()
+{
+  if(mouseIsPressed && JSON.stringify(prev_fill) !== JSON.stringify({mouseX,mouseY,brushSize,brushColor}))
+  {
+	  	fill(brushColor)
+	  	ellipse(mouseX,mouseY,brushSize,brushSize);
+	  	console.log(mouseX,mouseY)
+	  	prev_fill = {mouseX,mouseY,brushSize,brushColor};
+	  	drawnSomething = true;
+	  	if(undo_done == true)
+	  	{
+			// redo_data array must be flushed when we make changes after using undo
+	  		redo_data.length = 0;
+	  	}
+  }
+}
+
+window.onkeydown = (e) =>
+{
+
+	if(e.ctrlKey == true && e.key == "y" && redo_data.length > 0){
+		let imageData = redo_data[redo_data.length-1];
+		ctx.putImageData(imageData,0,0);
+		data.push(redo_data.pop());
+		// redo_data array must be flushed when we make changes after using undo
 	}
 	if(e.ctrlKey == true && e.key == "z" && data.length > 1){
 		let imageData = data[data.length-2];
 		ctx.putImageData(imageData,0,0);
-		data.length = data.length - 1;
+		redo_data.push(data.pop());
+		undo_done = true;
 	}
 }
 
-window.addEventListener("mouseup", (e)=>{
+function mouseReleased()
+{
 	// FIXED ISSUE :: data get pushed irrespective of wether we have drawn anything or not
-	if(drawnSomething){
+	if(drawnSomething)
+	{
 		data.push(ctx.getImageData(0,0,width,height));
 		drawnSomething = false;
 	}
-})
+}
 
-// window.addEventListener("mousemove", (e)=>{
-//   	console.count("check")
-//   	// translate(mouseX,mouseY)
-//   	fill(brushColor)
-//   	ellipse(mouseX,mouseY,brushSize,brushSize);
-//   	// data.push(ctx.getImageData(0,0,width,height));
-// });
-
+function mouseWheel(event)
+{
+	if(event.delta == 100 && event.shiftKey == true)
+	{
+		// downward motion of mouse wheel
+		brushSize--;
+	}
+	if(event.delta == -100 && event.shiftKey == true)
+	{
+		// upward motion of mouse wheel
+		brushSize++;
+	}
+}
 
 /*
 
