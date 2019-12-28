@@ -38,25 +38,24 @@ function draw() {
 		// redo_data array must be flushed when we make changes after using undo
   		redo_data.length = 0;
   	}
+	console.count("loop");
   }
 }
 
 
 function mouseDragged()
 {
-  if(mouseIsPressed && JSON.stringify(prev_fill) !== JSON.stringify({mouseX,mouseY,brushSize,brushColor}))
-  {
-	  	fill(brushColor)
-	  	ellipse(mouseX,mouseY,brushSize,brushSize);
-	  	console.log(mouseX,mouseY)
-	  	prev_fill = {mouseX,mouseY,brushSize,brushColor};
-	  	drawnSomething = true;
-	  	if(undo_done == true)
-	  	{
-			// redo_data array must be flushed when we make changes after using undo
-	  		redo_data.length = 0;
-	  	}
-  }
+	fill(brushColor)
+	ellipse(mouseX,mouseY,brushSize,brushSize);
+	// console.log(mouseX,mouseY)
+	prev_fill = {mouseX,mouseY,brushSize,brushColor};
+	drawnSomething = true;
+	if(undo_done == true)
+	{
+		// redo_data array must be flushed when we make changes after using undo
+		redo_data.length = 0;
+	}
+	console.count("function");
 }
 
 window.onkeydown = (e) =>
@@ -97,6 +96,12 @@ function mouseWheel(event)
 	{
 		// upward motion of mouse wheel
 		brushSize++;
+	}
+	if(brushSize < 1){
+		brushSize = 1;
+	}
+	if(brushSize > 100){
+		brushSize = 100;
 	}
 }
 
